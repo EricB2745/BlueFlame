@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>BlueFlame Process Management - Orders</title>
+        <link href="css/jquery-ui.css" rel="stylesheet">
+        <link href="css/BlueFlame.css" rel="stylesheet">
+        <link href="css/datatables.min.css" rel="stylesheet">
+
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="js/datatables.min.js"></script>
+
+
+        <script>
+            var editor_customer; // global editor object
+
+            $(document).ready(function() {
+            editor_customer = new $.fn.dataTable.Editor( {
+                ajax: "cgi-bin/Customer.py",
+                // ajax: "cgi-bin/params.py",
+                table: "#tblcustomers",
+                idSrc:  'id',
+                fields: [ {
+                            label: "Id:",
+                            name: "id",
+                            type: "readonly",
+                        }, {
+                            label: "Name:",
+                            name: "name"
+                         }, {
+                            label: "Customer Type:",
+                            name: "custtypeid",
+                            type:  "select"
+                         }, {
+                            label: "Priority:",
+                            name: "priority",
+                            type: "select",
+                            options: [
+                                { label: "No",   value: "N" },
+                                { label: "Yes",  value: "Y" }
+                            ]
+                        }
+                    ]
+                } );
+
+                $('#tblcustomers').DataTable( {
+                    dom: "Bfrtip",
+                    ajax: {
+                        url: 'cgi-bin/Customer.py?action=search&status=All',
+                        dataSrc: 'Customers'
+                    },
+                    columns: [
+                        { data: 'id' },
+                        { data: 'name' },
+                        { data: 'custtype' },
+                        { data: 'priority' }
+                    ],
+                    select: true,
+                    buttons: [
+                        { extend: "create", editor: editor_customer },
+                        { extend: "edit",   editor: editor_customer },
+                        { extend: "remove", editor: editor_customer }
+                    ]
+                } );
+            } );
+
+
+        </script>
+    </head>
+    <body>
+
+        <table id="tblcustomers" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Priority</th>
+                </tr>
+            </thead>
+
+        </table>
+
+    </body>
+</html>

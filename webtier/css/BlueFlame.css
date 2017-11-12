@@ -1,0 +1,16 @@
+/*
+
+    p applies all paragraph tags
+    . applies to classes
+    # applies to specific id
+*/
+
+body{
+    font-family: "Trebuchet MS", "Ariel", sans-serif;
+
+}
+
+.admin_container {
+    position: absolute;
+    left: 12em;
+}

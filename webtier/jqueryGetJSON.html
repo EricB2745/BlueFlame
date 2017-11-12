@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script>
+$(document).ready(function(){
+    $("button").click(function() {
+        alert('In')
+          // var URL = "cgi-bin/OrderStatus.py?action=get&id=3";
+          var URL = "cgi-bin/OrderStatus.py"
+          $.getJSON( URL,
+            {
+                action: "get",
+                id: 3
+            },
+            function( data ) {
+              var OrderStatus = data.OrderStatus
+              alert(OrderStatus.description)
+          });
+    });
+});
+</script>
+</head>
+<body>
+
+<button>Send an HTTP POST request to a page and get the result back</button>
+
+</body>
+</html>

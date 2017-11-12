@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="us">
+    <head>
+        <meta charset="utf-8">
+        <title>BlueFlame Process Management</title>
+        <link href="css/jquery-ui.css" rel="stylesheet">
+        <link href="css/BlueFlame.css" rel="stylesheet">
+        <link href="css/fullcalendar.min.css" rel="stylesheet">
+        <style type="text/css">
+            html, body, table { height:                 100% }
+        </style>
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script src="js/moment.js"></script>
+        <script src="js/fullcalendar.min.js"></script>
+
+        <script>
+        function postEvent(sAction, iId, sStart, sEnd, iColorId)
+            {
+                $.ajax({
+                    type:    "POST",
+                    dataType:"json",
+                    url:     "/cgi-bin/ColorTime.py",
+                    data:    {"action": sAction, "id": iId, "status": "Active",
+                              "startdatetime": sStart, "enddatetime": sEnd,
+                              "colorid": iColorId
+                              },
+                    success: function(data) {
+                        $('#divcalendar').fullCalendar( 'refetchEvents' )
+                    },
+                    error:   function(jqXHR, textStatus, errorThrown) {
+                        alert("Error, status = " + textStatus + ", " +
+                          "error thrown: " + errorThrown
+                        );
+                    }
+                });
+            }
+
+            function ConfirmDialog(message, functionToCallOnYes, arg1) {
+                $('<div></div>').appendTo('body')
+                    .html('<div><h3>'+message+'?</h3></div>')
+                    .dialog({
+                        modal: true, title: 'Confirm', zIndex: 10000, autoOpen: true,
+                        width: 'auto', resizable: false,
+                        buttons: {
+                            Yes: function () {
+                                $(this).dialog("close");
+                                functionToCallOnYes(arg1)
+                            },
+                            No: function () {
+                                $(this).dialog("close");
+                            }
+                        },
+                        close: function (event, ui) {
+                            $(this).remove();
+                        }
+                    });
+                    return bReturnVal
+            };
+
+            function deleteEvent(id) {
+                postEvent("delete", id, '', '', 0)
+            }
+
+            function buildSelectMenu(options) {
+                $( "#selCode" )
+                    .append(options.join(""))
+                    .selectmenu({
+                        select: function( event, ui ) {
+                            var hexvalue = $('option:selected', this).attr('hexvalue')
+                            var desc = $('option:selected', this).attr('desc')
+                            $('#clrColor').val( hexvalue );
+                            $('#txtDesc').val( desc );
+                        }
+                    });
+             }
+
+            $(document).ready(function() {
+                // page is now ready, initialize the calendar...
+
+                $('#divcalendar').fullCalendar({
+                    // put your options and callbacks here
+                    header: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'month,agendaWeek,agendaDay'
+                    },
+                    defaultView: 'agendaWeek',
+                    editable: true,
+                    events:  "/cgi-bin/ColorTime.py?action=searchforcalendar",
+                    businessHours: {
+                        // days of week. an array of zero-based day of week integers (0=Sunday)
+                        dow: [ 1, 2, 3, 4, 5 ], // Monday - Thursday
+
+                        start: '08:00',
+                        end: '18:00',
+                    },
+                    allDaySlot: false,
+                    minTime: '06:00:00',
+                    maxTime: '20:00:00',
+                    selectable: true,
+                    select: function( start, end, jsEvent, view) {
+                        postEvent("add", 0, start.format(), end.format(), $('#selCode option:selected').attr('colorid'))
+                    },
+                    eventDrop: function(event, delta, revertFunc) {
+                        postEvent("modify", event.id, event.start.format(), event.end.format(), event.colorid)
+                    },
+                    eventResize: function(event, delta, revertFunc) {
+                        postEvent("modify", event.id, event.start.format(), event.end.format(), event.colorid)
+                    },
+                    eventClick: function(calEvent, jsEvent, view) {
+                        ConfirmDialog("Delete color block", deleteEvent, calEvent.id);
+                    }
+                })
+
+                var options = [];
+
+                $.getJSON("/cgi-bin/Color.py?action=search&status=Active", function(data){
+                    for (i = 0; i < data.Colors.length; i ++)
+                    {
+                        sOption = "<option value='" + data.Colors[i].code + "' hexvalue='"+data.Colors[i].hexcode+"' desc='"+data.Colors[i].description+"' colorid='"+data.Colors[i].id+"'";
+                        if (i==0) { sOption += " selected='selected' "; }
+                        sOption += ">" + data.Colors[i].code + "</option>";
+                        options.push(sOption);
+                    }
+
+                    buildSelectMenu(options)
+                });
+
+
+
+                $(document).on("change" , "#clrColor" , function(){
+                    // alert($(this).val());
+                });
+
+            })
+
+
+
+        </script>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td style="vertical-align:top">
+                    <div id="divcolorselector" >
+                        <table>
+                            <tr><td>&nbsp</td></tr>
+                            <tr><td>&nbsp</td></tr>
+                            <tr>
+                                <td><a class="ui-widget">Code</a></td><td><select id="selCode"></td>
+                            </tr>
+                            <tr>
+                                <td><a class="ui-widget">Description</a></td><td><input type="text" id="txtDesc" class="ui-widget"></td>
+                            </tr>
+                            <tr>
+                                <td><a class="ui-widget">Color</a></td><td><input type="color" id="clrColor" class="ui-widget"></td>
+                            </tr>
+                            <tr>
+                                <td><div id="divTest"></div></td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td>
+                    <div id="divcalendar" style="height=100%"></div>
+                </td>
+            </tr>
+        </table>
+
+    </body>
+</html>

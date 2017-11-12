@@ -1,0 +1,53 @@
+
+<!doctype html>
+<html lang="us">
+    <head>
+        <meta charset="utf-8">
+        <title>BlueFlame Process Management</title>
+        <link href="css/jquery-ui.css" rel="stylesheet">
+        <link href="css/BlueFlame.css" rel="stylesheet">
+
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery-ui.js"></script>
+        <script>
+            $(document).ready(function() {
+
+                $( "#tabs" ).tabs();
+
+                $( function() {
+                    $( "#tabs" ).tabs({
+                      beforeLoad: function( event, ui ) {
+                        ui.jqXHR.fail(function() {
+                          ui.panel.html(
+                            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+                            "If this wouldn't be a demo." );
+                        });
+                      }
+                    });
+                  } );
+
+            });
+        </script>
+    </head>
+    <body>
+
+        <h1>BlueFlame Process Management</h1>
+
+        <!-- Tabs -->
+        <div id="tabs">
+            <ul>
+                <li><a href="orders.html">Order Management</a></li>
+                <li><a href="prep.html">Prep</a></li>
+                <li><a href="special.html">Special</a></li>
+                <li><a href="paint.html">Paint</a></li>
+                <li><a href="workcomplete.html">Complete</a></li>
+                <li><a href="calendar.html">Calendar</a></li>
+               <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </div>
+
+
+
+    </body>
+</html>
+
